@@ -137,11 +137,10 @@ newtype SHA = SHA { getSHA :: ByteString } deriving (Eq, Ord, Read)
 shaToText :: SHA -> Text
 shaToText (SHA bs) = T.decodeUtf8 (B16.encode bs)
 
-textToSha :: Monad m => Text -> m SHA
-textToSha t =
-    case B16.decode $ T.encodeUtf8 t of
-        (bs, "") -> return (SHA bs)
-        _ -> fail "Invalid base16 encoding"
+textToSha :: (Monad m, MonadFail m) => Text -> m SHA
+textToSha t = case B16.decode $ T.encodeUtf8 t of
+    Right bs -> return (SHA bs)
+    Left _ -> fail "Invalid base16 encoding"
 
 instance IsOid SHA where
     renderOid = shaToText
